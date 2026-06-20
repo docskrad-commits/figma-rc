@@ -41,7 +41,7 @@ export function Solution({ onSchedule, navigate }: Props) {
               fontSize: isMobile ? "clamp(26px, 7vw, 40px)" : "clamp(36px, 4.5vw, 60px)",
               fontWeight: 800, color: C.white, lineHeight: 1.05, letterSpacing: "-2px",
             }}>
-              A smarter way to scale radiology operations.
+              A smarter way to scale preliminary radiology reporting operations.
             </h2>
           </div>
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 16 }}>

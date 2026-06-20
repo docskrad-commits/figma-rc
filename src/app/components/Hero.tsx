@@ -45,10 +45,10 @@ export function Hero({ navigate, onSchedule }: HeroProps) {
         {/* Centered hero text */}
         <div style={{ textAlign: "center", marginBottom: isMobile ? 48 : 72 }}>
           <p style={{
-            color: "rgba(255,255,255,0.35)", fontSize: 13, fontWeight: 600,
+            color: "rgba(255,255,255,0.35)", fontSize: 14, fontWeight: 600,
             letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 24,
           }}>
-            Teleradiology · Preliminary Reporting
+            Preliminary Radiology Reporting
           </p>
 
           <h1 style={{
@@ -71,7 +71,7 @@ export function Hero({ navigate, onSchedule }: HeroProps) {
             maxWidth: isMobile ? "100%" : 560,
             margin: "0 auto 36px",
           }}>
-            Teleradiology and preliminary reporting that helps radiology groups reduce turnaround times,
+            Preliminary radiology reporting that helps radiology groups reduce turnaround times,
             alleviate workforce shortages, and improve operational efficiency through a global network
             of experienced radiologists.
           </p>

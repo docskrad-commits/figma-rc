@@ -19,10 +19,10 @@ export function SolutionsPage({ onSchedule, navigate }: Props) {
             fontWeight: 900, color: C.white, lineHeight: 1.06, letterSpacing: "-2px",
             marginBottom: 18, maxWidth: 760, margin: "0 auto 18px",
           }}>
-            Smarter Ways to Scale Radiology Operations
+            Smarter Ways to Scale Preliminary Radiology Reporting Operations
           </h1>
           <p style={{ color: "rgba(255,255,255,0.5)", fontSize: isMobile ? 15 : 18, lineHeight: 1.68, maxWidth: 520, margin: "0 auto" }}>
-            Purpose-built teleradiology solutions that give radiology organizations the capacity they need.
+            Purpose-built teleradiology and preliminary radiology reporting solutions that give radiology organizations the capacity they need.
           </p>
         </div>
       </div>

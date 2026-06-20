@@ -29,10 +29,7 @@ export function WhyRadCardPage({ onSchedule, navigate }: Props) {
           <p style={{
             color: "rgba(255,255,255,0.5)", fontSize: isMobile ? 16 : 18,
             lineHeight: 1.68, maxWidth: 520, margin: "0 auto 32px",
-          }}>
-            The radiology workforce partner for organizations that need to scale without compromise —
-            not a technology product, a clinical operations partner.
-          </p>
+          }}>The radiology workforce partner for organizations that need to scale without compromise.</p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <button onClick={onSchedule} style={{
               background: C.white, color: C.navy, border: "none",
