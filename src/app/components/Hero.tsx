@@ -45,10 +45,10 @@ export function Hero({ navigate, onSchedule }: HeroProps) {
         {/* Centered hero text */}
         <div style={{ textAlign: "center", marginBottom: isMobile ? 48 : 72 }}>
           <p style={{
-            color: "rgba(255,255,255,0.35)", fontSize: 11, fontWeight: 600,
+            color: "rgba(255,255,255,0.35)", fontSize: 13, fontWeight: 600,
             letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 24,
           }}>
-            Teleradiology · Preliminary Reporting · Global Operations
+            Teleradiology · Preliminary Reporting
           </p>
 
           <h1 style={{

@@ -130,7 +130,7 @@ export function Nav({ currentPage, navigate, onSchedule }: NavProps) {
                   onMouseLeave={() => setHoveredLink(null)}
                   style={{
                     position: "relative",
-                    color: isActive ? C.white : "rgba(255,255,255,0.55)",
+                    color: isActive ? C.white : C.white,
                     background: isActive ? "rgba(255,255,255,0.07)" : isHov ? "rgba(255,255,255,0.04)" : "none",
                     border: "none",
                     cursor: "pointer",
