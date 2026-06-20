@@ -135,7 +135,7 @@ export default function App() {
       "@type": "Organization",
       "name": "RadCard Global",
       "description": "Teleradiology company providing preliminary reporting services",
-      "url": "https://www.radcardglobal.com",
+      "url": "https://www.radcardhealth.com",
       "email": "info@radcardhealth.com",
       "telephone": "+91-6302160253",
       "areaServed": ["United States", "United Kingdom", "Europe", "Middle East", "Australia", "New Zealand", "Singapore"],
