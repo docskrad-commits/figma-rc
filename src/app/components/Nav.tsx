@@ -97,7 +97,13 @@ export function Nav({ currentPage, navigate, onSchedule }: NavProps) {
       transition: "border-color 0.2s",
       fontFamily: C.font,
     }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
+      <div
+  style={{
+    maxWidth: 1280,
+    margin: "0 auto",
+    padding: "0 clamp(16px, 3vw, 24px)",
+  }}
+>
         <div style={{ display: "flex", alignItems: "center", height: 68 }}>
 
           {/* Logo */}
@@ -116,8 +122,8 @@ export function Nav({ currentPage, navigate, onSchedule }: NavProps) {
 
           {/* Desktop nav — pushed 100px from logo, takes remaining space */}
           <div
-            className="hidden xl:flex"
-            style={{ display: "flex", alignItems: "center", gap: 0, marginLeft: 100, flex: 1 }}
+            className="hidden lg:flex"
+            style={{ alignItems: "center", gap: 0, marginLeft: 40, flex: 1 }}
           >
             {NAV_LINKS.map((link) => {
               const isActive = currentPage === link.page;
@@ -136,7 +142,7 @@ export function Nav({ currentPage, navigate, onSchedule }: NavProps) {
                     cursor: "pointer",
                     padding: "6px 11px",
                     borderRadius: 5,
-                    fontSize: 12.5,
+                    fontSize: 12,
                     fontWeight: isActive ? 600 : 400,
                     fontFamily: C.font,
                     letterSpacing: "0.01em",
@@ -188,12 +194,12 @@ export function Nav({ currentPage, navigate, onSchedule }: NavProps) {
 
             {/* Hamburger — visible below xl */}
             <button
-              className="xl:hidden"
+              className="flex lg:hidden"
               onClick={() => setMobileOpen(o => !o)}
               aria-label="Toggle menu"
               style={{
                 background: "none", border: "none", cursor: "pointer",
-                color: C.white, padding: 6, display: "flex", alignItems: "center",
+                color: C.white, padding: 6, alignItems: "center",
               }}
             >
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}

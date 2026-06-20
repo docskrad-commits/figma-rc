@@ -21,7 +21,7 @@ export function FloatingButtons({ onSchedule }: Props) {
           position: "fixed",
           bottom: isMobile ? 20 : 28,
           right: isMobile ? 16 : 28,
-          zIndex: 150,
+          zIndex: 9999,
           width: 50,
           height: 50,
           borderRadius: "50%",
@@ -38,13 +38,13 @@ export function FloatingButtons({ onSchedule }: Props) {
         </svg>
       </a>
 
-      {/* Schedule CTA — only on desktop/tablet */}
-      {ctaVisible && !isMobile && (
+      {/* Schedule CTA */}
+      {ctaVisible && (
         <div style={{
           position: "fixed",
-          bottom: 88,
-          right: 28,
-          zIndex: 150,
+          bottom: isMobile ? 80 : 88,
+          right: isMobile ? 16 : 28,
+          zIndex: 9999,
           display: "flex",
           alignItems: "center",
           borderRadius: 8,
@@ -56,7 +56,7 @@ export function FloatingButtons({ onSchedule }: Props) {
             style={{
               display: "flex", alignItems: "center", gap: 8,
               background: C.navy, color: C.white, border: "none",
-              padding: "11px 18px", fontSize: 13, fontWeight: 700,
+              padding: isMobile ? "10px 14px" : "11px 18px", fontSize: isMobile ? 12 : 13, fontWeight: 700,
               fontFamily: C.font, cursor: "pointer", whiteSpace: "nowrap",
             }}
           >
