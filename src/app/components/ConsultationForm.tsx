@@ -3,6 +3,11 @@ import { X } from "lucide-react";
 import { C } from "./Nav";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 
+const encode = (data: Record<string, string>) =>
+  Object.keys(data)
+    .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+    .join("&");
+
 const ROLES = ["Managing Partner", "Medical Director", "Chief Radiologist", "Practice Administrator", "COO", "CEO", "Operations Leader", "Other"];
 const COUNTRIES = ["United States", "United Kingdom", "Australia", "New Zealand", "Germany", "France", "Netherlands", "UAE", "Saudi Arabia", "Qatar", "Singapore", "Other"];
 const CHALLENGES = ["Overflow / Peak Volume", "Overnight Coverage", "Weekend Coverage", "Workforce Shortages", "Burnout", "Turnaround Times", "Subspecialty Support", "Cost Reduction", "Other"];
@@ -12,6 +17,8 @@ interface Props { onClose: () => void; }
 
 export function ConsultationForm({ onClose }: Props) {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formType, setFormType] = useState<"consultation" | "proposal">("consultation");
   const [form, setForm] = useState({
     name: "", organization: "", role: "", country: "",
@@ -109,7 +116,37 @@ export function ConsultationForm({ onClose }: Props) {
             </button>
           </div>
         ) : (
-          <form onSubmit={e => { e.preventDefault(); setSubmitted(true); }} style={{ padding: "20px 24px 28px" }}>
+          <form
+            name={formType === "proposal" ? "proposal" : "consultation"}
+            method="POST"
+            data-netlify="true"
+            netlify-honeypot="bot-field"
+            onSubmit={async e => {
+              e.preventDefault();
+              setSubmitting(true);
+              setError(null);
+              const formName = formType === "proposal" ? "proposal" : "consultation";
+              try {
+                const res = await fetch("/", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                  body: encode({ "form-name": formName, ...form }),
+                });
+                if (res.ok) {
+                  setSubmitted(true);
+                } else {
+                  setError("Submission failed. Please try again or email us directly.");
+                }
+              } catch {
+                setError("Network error. Please try again or email us directly.");
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+            style={{ padding: "20px 24px 28px" }}
+          >
+            <input type="hidden" name="form-name" value={formType === "proposal" ? "proposal" : "consultation"} />
+            <input type="hidden" name="bot-field" />
             {/* Type toggle */}
             <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
               {([["consultation", "Schedule Consultation"], ["proposal", "Request Proposal"]] as const).map(([v, l]) => (
@@ -145,6 +182,7 @@ export function ConsultationForm({ onClose }: Props) {
                   <label style={{ display: "block", color: C.text, fontSize: 12.5, fontWeight: 600, marginBottom: 5 }}>{f.l}</label>
                   <input
                     required={f.req} type={f.t} style={iStyle}
+                    name={f.k}
                     placeholder={f.p}
                     value={(form as Record<string, string>)[f.k]}
                     onChange={e => set(f.k, e.target.value)}
@@ -163,6 +201,7 @@ export function ConsultationForm({ onClose }: Props) {
                   <label style={{ display: "block", color: C.text, fontSize: 12.5, fontWeight: 600, marginBottom: 5 }}>{f.l}</label>
                   <select
                     required={f.req} style={{ ...iStyle, cursor: "pointer" }}
+                    name={f.k}
                     value={(form as Record<string, string>)[f.k]}
                     onChange={e => set(f.k, e.target.value)}
                     onFocus={e => { (e.target as HTMLElement).style.borderColor = C.navy; }}
@@ -178,6 +217,7 @@ export function ConsultationForm({ onClose }: Props) {
             <div style={{ marginTop: 12 }}>
               <label style={{ display: "block", color: C.text, fontSize: 12.5, fontWeight: 600, marginBottom: 5 }}>Message</label>
               <textarea
+                name="message"
                 style={{ ...iStyle, height: 88, resize: "vertical" }}
                 placeholder="Tell us about your operations..."
                 value={form.message}
@@ -187,16 +227,22 @@ export function ConsultationForm({ onClose }: Props) {
               />
             </div>
 
+            {error && (
+              <p style={{ marginTop: 10, color: "#dc2626", fontSize: 13, lineHeight: 1.5 }}>{error}</p>
+            )}
+
             <div style={{ marginTop: 16, display: "flex", gap: 12, alignItems: "center", flexDirection: isMobile ? "column" : "row" }}>
-              <button type="submit" style={{
+              <button type="submit" disabled={submitting} style={{
                 flex: isMobile ? undefined : 1,
                 width: isMobile ? "100%" : "auto",
-                background: C.navy, color: C.white, border: "none",
+                background: submitting ? C.textMuted : C.navy, color: C.white, border: "none",
                 padding: "13px 24px", borderRadius: 7,
-                fontSize: 15, fontWeight: 700, fontFamily: C.font, cursor: "pointer",
+                fontSize: 15, fontWeight: 700, fontFamily: C.font,
+                cursor: submitting ? "not-allowed" : "pointer",
                 minHeight: 48,
+                opacity: submitting ? 0.7 : 1,
               }}>
-                {formType === "proposal" ? "Request Proposal" : "Schedule Consultation"}
+                {submitting ? "Submitting…" : formType === "proposal" ? "Request Proposal" : "Schedule Consultation"}
               </button>
               {!isMobile && (
                 <p style={{ color: C.textMuted, fontSize: 11, maxWidth: 180, lineHeight: 1.5 }}>

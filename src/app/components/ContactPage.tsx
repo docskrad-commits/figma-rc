@@ -3,6 +3,11 @@ import { Mail, Phone, Globe2, Clock } from "lucide-react";
 import { C } from "./Nav";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 
+const encode = (data: Record<string, string>) =>
+  Object.keys(data)
+    .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+    .join("&");
+
 const ROLES = ["Managing Partner", "Medical Director", "Chief Radiologist", "Practice Administrator", "COO", "CEO", "Operations Leader", "Other"];
 const COUNTRIES = ["United States", "United Kingdom", "Australia", "New Zealand", "Germany", "France", "Netherlands", "UAE", "Saudi Arabia", "Qatar", "Singapore", "Other"];
 const CHALLENGES = ["Overflow / Peak Volume", "Overnight Coverage", "Weekend Coverage", "Workforce Shortages", "Burnout", "Turnaround Times", "Subspecialty Support", "Cost Reduction", "Other"];
@@ -10,6 +15,8 @@ const VOLUMES = ["< 500 / month", "500 – 2,000 / month", "2,000 – 5,000 / mo
 
 export function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formType, setFormType] = useState<"consultation" | "proposal">("consultation");
   const [form, setForm] = useState({ name: "", organization: "", role: "", country: "", email: "", phone: "", challenge: "", volume: "", message: "" });
   const { isMobile, isTablet } = useBreakpoint();
@@ -81,7 +88,36 @@ export function ContactPage() {
                   ))}
                 </div>
 
-                <form onSubmit={e => { e.preventDefault(); setSubmitted(true); }}>
+                <form
+                  name={formType === "proposal" ? "proposal" : "consultation"}
+                  method="POST"
+                  data-netlify="true"
+                  netlify-honeypot="bot-field"
+                  onSubmit={async e => {
+                    e.preventDefault();
+                    setSubmitting(true);
+                    setError(null);
+                    const formName = formType === "proposal" ? "proposal" : "consultation";
+                    try {
+                      const res = await fetch("/", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: encode({ "form-name": formName, ...form }),
+                      });
+                      if (res.ok) {
+                        setSubmitted(true);
+                      } else {
+                        setError("Submission failed. Please try again or email us directly.");
+                      }
+                    } catch {
+                      setError("Network error. Please try again or email us directly.");
+                    } finally {
+                      setSubmitting(false);
+                    }
+                  }}
+                >
+                  <input type="hidden" name="form-name" value={formType === "proposal" ? "proposal" : "consultation"} />
+                  <input type="hidden" name="bot-field" />
                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 14, marginBottom: 14 }}>
                     {[
                       { k: "name", l: "Full Name *", p: "Dr. Jane Smith", t: "text", req: true },
@@ -92,6 +128,7 @@ export function ContactPage() {
                       <div key={f.k}>
                         <label style={{ display: "block", color: C.text, fontSize: 12.5, fontWeight: 600, marginBottom: 5 }}>{f.l}</label>
                         <input required={f.req} type={f.t} style={iStyle} placeholder={f.p}
+                          name={f.k}
                           value={(form as Record<string, string>)[f.k]} onChange={e => set(f.k, e.target.value)}
                           onFocus={e => { (e.target as HTMLElement).style.borderColor = C.navy; }}
                           onBlur={e => { (e.target as HTMLElement).style.borderColor = C.border; }}
@@ -107,6 +144,7 @@ export function ContactPage() {
                       <div key={f.k}>
                         <label style={{ display: "block", color: C.text, fontSize: 12.5, fontWeight: 600, marginBottom: 5 }}>{f.l}</label>
                         <select required={f.req} style={{ ...iStyle, cursor: "pointer" }}
+                          name={f.k}
                           value={(form as Record<string, string>)[f.k]} onChange={e => set(f.k, e.target.value)}
                           onFocus={e => { (e.target as HTMLElement).style.borderColor = C.navy; }}
                           onBlur={e => { (e.target as HTMLElement).style.borderColor = C.border; }}
@@ -120,18 +158,24 @@ export function ContactPage() {
                   <div style={{ marginBottom: 18 }}>
                     <label style={{ display: "block", color: C.text, fontSize: 12.5, fontWeight: 600, marginBottom: 5 }}>Message</label>
                     <textarea style={{ ...iStyle, height: 90, resize: "vertical" }}
+                      name="message"
                       placeholder="Tell us more about your operations..."
                       value={form.message} onChange={e => set("message", e.target.value)}
                       onFocus={e => { (e.target as HTMLElement).style.borderColor = C.navy; }}
                       onBlur={e => { (e.target as HTMLElement).style.borderColor = C.border; }}
                     />
                   </div>
-                  <button type="submit" style={{
-                    width: "100%", background: formType === "proposal" ? C.accentBlue : C.navy,
+                  {error && (
+                    <p style={{ marginBottom: 12, color: "#dc2626", fontSize: 13, lineHeight: 1.5 }}>{error}</p>
+                  )}
+                  <button type="submit" disabled={submitting} style={{
+                    width: "100%", background: submitting ? C.textMuted : formType === "proposal" ? C.accentBlue : C.navy,
                     color: C.white, border: "none", padding: "14px 24px", borderRadius: 8,
-                    fontSize: 15, fontWeight: 700, fontFamily: C.font, cursor: "pointer", minHeight: 48,
+                    fontSize: 15, fontWeight: 700, fontFamily: C.font,
+                    cursor: submitting ? "not-allowed" : "pointer",
+                    minHeight: 48, opacity: submitting ? 0.7 : 1,
                   }}>
-                    {formType === "proposal" ? "Request Proposal" : "Schedule Consultation"}
+                    {submitting ? "Submitting…" : formType === "proposal" ? "Request Proposal" : "Schedule Consultation"}
                   </button>
                 </form>
               </>

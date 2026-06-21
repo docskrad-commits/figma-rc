@@ -13,7 +13,50 @@
     </head>
 
     <body>
-      
+      <!-- Netlify Forms detection: hidden forms for build-time registration -->
+      <form name="consultation" netlify netlify-honeypot="bot-field" hidden>
+        <input name="bot-field" />
+        <input name="name" />
+        <input name="organization" />
+        <input name="role" />
+        <input name="country" />
+        <input name="email" />
+        <input name="phone" />
+        <input name="challenge" />
+        <input name="volume" />
+        <textarea name="message"></textarea>
+      </form>
+
+      <form name="proposal" netlify netlify-honeypot="bot-field" hidden>
+        <input name="bot-field" />
+        <input name="name" />
+        <input name="organization" />
+        <input name="role" />
+        <input name="country" />
+        <input name="email" />
+        <input name="phone" />
+        <input name="challenge" />
+        <input name="volume" />
+        <textarea name="message"></textarea>
+      </form>
+
+      <form name="contact" netlify netlify-honeypot="bot-field" hidden>
+        <input name="bot-field" />
+        <input name="name" />
+        <input name="email" />
+        <input name="phone" />
+        <textarea name="message"></textarea>
+      </form>
+
+      <form name="careers" netlify netlify-honeypot="bot-field" hidden>
+        <input name="bot-field" />
+        <input name="name" />
+        <input name="email" />
+        <input name="phone" />
+        <input name="organization" />
+        <textarea name="message"></textarea>
+      </form>
+
       <div id="root"></div>
       <script type="module" src="/src/main.tsx"></script>
       
