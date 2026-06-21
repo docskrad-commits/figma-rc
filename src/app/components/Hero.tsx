@@ -18,9 +18,9 @@ const ZONES = [
   { flag: "🇦🇺", city: "Sydney", time: "11:42 PM" },
 ];
 
-interface HeroProps { navigate: (page: string) => void; onSchedule: () => void; }
+interface HeroProps { navigate: (page: string) => void; onSchedule: () => void; onCapabilityStatement: () => void; }
 
-export function Hero({ navigate, onSchedule }: HeroProps) {
+export function Hero({ navigate, onSchedule, onCapabilityStatement }: HeroProps) {
   const [active, setActive] = useState(0);
   const { isMobile, isTablet } = useBreakpoint();
 
@@ -101,6 +101,32 @@ export function Hero({ navigate, onSchedule }: HeroProps) {
               textDecorationColor: "rgba(255,255,255,0.25)",
             }}>
               Explore our services
+            </button>
+            <button
+              onClick={onCapabilityStatement}
+              style={{
+                background: C.white,
+                color: C.navy,
+                fontFamily: C.font,
+                cursor: "pointer",
+                border: "1px solid rgba(255,255,255,0.28)",
+                borderRadius: 8,
+                padding: "12px 18px",
+                fontSize: isMobile ? 14 : 13,
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 7,
+                width: isMobile ? "100%" : "auto",
+                maxWidth: isMobile ? 320 : "none",
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M2 1.5h9M2 4.5h9M2 7.5h5.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+                <path d="M8.5 9.5l1.5 1.5L13 7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              View Capability Statement
             </button>
           </div>
 

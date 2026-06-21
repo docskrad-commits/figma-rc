@@ -19,6 +19,7 @@ import { SolutionsPage } from "./components/SolutionsPage";
 import { RegionsPage } from "./components/RegionsPage";
 import { QualityPage } from "./components/QualityPage";
 import { WhyRadCardPage } from "./components/WhyRadCardPage";
+import { CapabilityStatement, printCapabilityStatement } from "./components/CapabilityStatement";
 import { C } from "./components/Nav";
 
 const SEO: Record<string, { title: string; desc: string }> = {
@@ -69,10 +70,131 @@ function injectFavicon() {
   document.head.appendChild(link);
 }
 
-function HomePage({ navigate, onSchedule }: { navigate: (p: string) => void; onSchedule: () => void }) {
+// ─── Capability Statement Modal ──────────────────────────────────────
+const DOC_W = 1123;
+const DOC_H = 850; // slightly taller than 794 to account for increased font sizes
+
+function CapabilityModal({ onClose, onSchedule, onRequestProposal }: { onClose: () => void; onSchedule: () => void; onRequestProposal: () => void }) {
+  // Lazy init: compute scale BEFORE first render so there's no layout flash on mobile
+  const [scale, setScale] = useState<number>(() =>
+    Math.min(1, (window.innerWidth - 16) / DOC_W)
+  );
+
+  useEffect(() => {
+    const updateScale = () =>
+      setScale(Math.min(1, (window.innerWidth - 16) / DOC_W));
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("resize", updateScale);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", updateScale);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  const scaledW = Math.round(DOC_W * scale);
+  const scaledH = Math.round(DOC_H * scale);
+
+  return (
+    <div style={{
+      // Use explicit top/left/right/bottom — more reliable than inset on iOS Safari
+      position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+      zIndex: 9000, background: "#060e1bF5",
+      display: "flex", flexDirection: "column",
+    }}>
+      {/* ── Toolbar: always fits on any screen width ── */}
+      <div style={{
+        flexShrink: 0,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "10px 14px", gap: 10,
+        background: "#060e1b",
+        borderBottom: "1px solid rgba(255,255,255,0.1)",
+      }}>
+        {/* Title — truncates gracefully on mobile */}
+        <div style={{
+          flex: 1, fontSize: 12, fontWeight: 700,
+          color: "rgba(255,255,255,0.9)", fontFamily: C.font,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          minWidth: 0,
+        }}>
+          RadCard Global — Capability Statement
+        </div>
+        {/* Actions — always visible, never pushed off-screen */}
+        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+          <button
+            onClick={printCapabilityStatement}
+            style={{
+              padding: "8px 14px", borderRadius: 8,
+              background: C.accentCyan, border: "none",
+              fontSize: 12, fontWeight: 700, color: C.navy,
+              fontFamily: C.font, cursor: "pointer", whiteSpace: "nowrap",
+            }}
+          >Save as PDF</button>
+          <button
+            onClick={onClose}
+            style={{
+              width: 36, height: 36, flexShrink: 0, borderRadius: 8,
+              background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)",
+              color: "rgba(255,255,255,0.85)", fontSize: 22, lineHeight: 1,
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: C.font,
+            }}
+          >×</button>
+        </div>
+      </div>
+
+      {/* ── Scrollable document area ── */}
+      {/*  overflow:auto in BOTH axes so mobile can scroll if needed         */}
+      {/*  justifyContent:flex-start keeps doc pinned to left — no centering */}
+      {/*  that could clip the left edge on small viewports                  */}
+      <div style={{
+        flex: 1,
+        overflow: "auto",
+        WebkitOverflowScrolling: "touch" as any,
+        display: "flex",
+        justifyContent: "flex-start",
+        alignItems: "flex-start",
+        padding: 12,
+      }}>
+        {/*
+          Clipping wrapper: takes up EXACTLY the scaled pixel dimensions.
+          This prevents the scroll container from reserving the full
+          pre-scale DOC_H (794px) which would leave a dead gap on mobile.
+        */}
+        <div style={{
+          width: scaledW, height: scaledH,
+          flexShrink: 0, position: "relative",
+          overflow: "hidden",
+        }}>
+          {/*
+            The document itself is always DOC_W × DOC_H and then
+            transformed. position:absolute + top/left:0 + transformOrigin
+            top-left ensures the scale origin matches the wrapper top-left.
+          */}
+          <div style={{
+            position: "absolute", top: 0, left: 0,
+            width: DOC_W,
+            transformOrigin: "top left",
+            transform: `scale(${scale})`,
+          }}>
+            <CapabilityStatement
+              onSchedule={() => { onClose(); onSchedule(); }}
+              onRequestProposal={() => { onClose(); onRequestProposal(); }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Home page ────────────────────────────────────────────────────────
+function HomePage({ navigate, onSchedule, onCapabilityStatement }: { navigate: (p: string) => void; onSchedule: () => void; onCapabilityStatement: () => void }) {
   return (
     <>
-      <Hero navigate={navigate} onSchedule={onSchedule} />
+      <Hero navigate={navigate} onSchedule={onSchedule} onCapabilityStatement={onCapabilityStatement} />
       <WorkforceCrisis />
       <WhyTraditionalFails />
       <PreliminaryReporting onSchedule={onSchedule} />
@@ -88,6 +210,7 @@ function HomePage({ navigate, onSchedule }: { navigate: (p: string) => void; onS
 export default function App() {
   const [page, setPage] = useState("home");
   const [formOpen, setFormOpen] = useState(false);
+  const [capOpen, setCapOpen] = useState(false);
 
   const navigate = (p: string) => {
     setPage(p);
@@ -145,7 +268,7 @@ export default function App() {
 
   const renderPage = () => {
     switch (page) {
-      case "home": return <HomePage navigate={navigate} onSchedule={openForm} />;
+      case "home": return <HomePage navigate={navigate} onSchedule={openForm} onCapabilityStatement={() => setCapOpen(true)} />;
       case "preliminary-reporting": return <PreliminaryReportingPage onSchedule={openForm} navigate={navigate} />;
       case "solutions": return <SolutionsPage onSchedule={openForm} navigate={navigate} />;
       case "why-radcard": return <WhyRadCardPage onSchedule={openForm} navigate={navigate} />;
@@ -153,7 +276,7 @@ export default function App() {
       case "quality": return <QualityPage onSchedule={openForm} />;
       case "about": return <AboutPage onSchedule={openForm} />;
       case "contact": return <ContactPage />;
-      default: return <HomePage navigate={navigate} onSchedule={openForm} />;
+      default: return <HomePage navigate={navigate} onSchedule={openForm} onCapabilityStatement={() => setCapOpen(true)} />;
     }
   };
 
@@ -164,6 +287,13 @@ export default function App() {
       <Footer navigate={navigate} onSchedule={openForm} />
       <FloatingButtons onSchedule={openForm} />
       {formOpen && <ConsultationForm onClose={closeForm} />}
+      {capOpen && (
+        <CapabilityModal
+          onClose={() => setCapOpen(false)}
+          onSchedule={openForm}
+          onRequestProposal={() => { setCapOpen(false); navigate("contact"); }}
+        />
+      )}
     </div>
   );
 }
