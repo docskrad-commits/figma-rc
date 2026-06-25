@@ -3,11 +3,6 @@ import { X } from "lucide-react";
 import { C } from "./Nav";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 
-const encode = (data: Record<string, string>) =>
-  Object.keys(data)
-    .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
-    .join("&");
-
 const ROLES = ["Managing Partner", "Medical Director", "Chief Radiologist", "Practice Administrator", "COO", "CEO", "Operations Leader", "Other"];
 const COUNTRIES = ["United States", "United Kingdom", "Australia", "New Zealand", "Germany", "France", "Netherlands", "UAE", "Saudi Arabia", "Qatar", "Singapore", "Other"];
 const CHALLENGES = ["Overflow / Peak Volume", "Overnight Coverage", "Weekend Coverage", "Workforce Shortages", "Burnout", "Turnaround Times", "Subspecialty Support", "Cost Reduction", "Other"];
@@ -34,7 +29,39 @@ export function ConsultationForm({ onClose }: Props) {
     fontSize: 14, fontFamily: C.font,
     color: C.text, background: C.white,
     outline: "none", boxSizing: "border-box",
-    minHeight: 44, // accessible tap target
+    minHeight: 44,
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          organization: form.organization,
+          role: form.role,
+          email: form.email,
+          phone: form.phone,
+          country: form.country,
+          service: [form.challenge, form.volume].filter(Boolean).join(" · ") || formType,
+          message: form.message,
+        }),
+      });
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError((data as { error?: string }).error ?? "Submission failed. Please try again or email us directly.");
+      }
+    } catch {
+      setError("Network error. Please try again or email us directly.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -116,40 +143,10 @@ export function ConsultationForm({ onClose }: Props) {
             </button>
           </div>
         ) : (
-          <form
-            name={formType === "proposal" ? "proposal" : "consultation"}
-            method="POST"
-            data-netlify="true"
-            netlify-honeypot="bot-field"
-            onSubmit={async e => {
-              e.preventDefault();
-              setSubmitting(true);
-              setError(null);
-              const formName = formType === "proposal" ? "proposal" : "consultation";
-              try {
-                const res = await fetch("/", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                  body: encode({ "form-name": formName, ...form }),
-                });
-                if (res.ok) {
-                  setSubmitted(true);
-                } else {
-                  setError("Submission failed. Please try again or email us directly.");
-                }
-              } catch {
-                setError("Network error. Please try again or email us directly.");
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-            style={{ padding: "20px 24px 28px" }}
-          >
-            <input type="hidden" name="form-name" value={formType === "proposal" ? "proposal" : "consultation"} />
-            <input type="hidden" name="bot-field" />
+          <form onSubmit={handleSubmit} style={{ padding: "20px 24px 28px" }}>
             {/* Type toggle */}
             <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-              {([["consultation", "Schedule Consultation"], ["proposal", "Request Proposal"]] as const).map(([v, l]) => (
+              {([ ["consultation", "Schedule Consultation"], ["proposal", "Request Proposal"] ] as const).map(([v, l]) => (
                 <button key={v} type="button" onClick={() => setFormType(v)} style={{
                   flex: 1, padding: "10px 8px",
                   borderRadius: 6,
@@ -166,7 +163,6 @@ export function ConsultationForm({ onClose }: Props) {
               ))}
             </div>
 
-            {/* Fields — always single column on mobile, 2-col on desktop */}
             <div style={{
               display: "grid",
               gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
