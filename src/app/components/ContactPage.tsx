@@ -31,9 +31,9 @@ export function ContactPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("https://formspree.io/f/meebaoad", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           name: form.name,
           organization: form.organization,
@@ -41,18 +41,18 @@ export function ContactPage() {
           email: form.email,
           phone: form.phone,
           country: form.country,
-          service: [form.challenge, form.volume].filter(Boolean).join(" · ") || formType,
+          "service needed": [form.challenge, form.volume].filter(Boolean).join(" · ") || formType,
           message: form.message,
         }),
       });
       if (res.ok) {
         setSubmitted(true);
+        setForm({ name: "", organization: "", role: "", country: "", email: "", phone: "", challenge: "", volume: "", message: "" });
       } else {
-        const data = await res.json().catch(() => ({}));
-        setError((data as { error?: string }).error ?? "Submission failed. Please try again or email us directly.");
+        setError("Submission failed. Please try again or email info@radcardhealth.com.");
       }
     } catch {
-      setError("Network error. Please try again or email us directly.");
+      setError("Submission failed. Please try again or email info@radcardhealth.com.");
     } finally {
       setSubmitting(false);
     }
@@ -91,7 +91,7 @@ export function ContactPage() {
                 </div>
                 <h3 style={{ color: C.text, fontSize: 20, fontWeight: 800, marginBottom: 10 }}>We've received your request.</h3>
                 <p style={{ color: C.textSec, fontSize: 14.5, lineHeight: 1.7, maxWidth: 360, margin: "0 auto 16px" }}>
-                  A member of our team will reach out within 24 hours.
+                  Thank you for contacting RadCard Global. Your consultation request has been received. Our team will contact you within one business day.
                 </p>
                 <p style={{ color: C.textMuted, fontSize: 12.5 }}>
                   Urgent? <a href="mailto:info@radcardhealth.com" style={{ color: C.accentBlue }}>info@radcardhealth.com</a>
